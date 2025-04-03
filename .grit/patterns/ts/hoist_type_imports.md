@@ -18,50 +18,11 @@ function extractTypeName($import) js {
 }
 
 function extractBodyWithoutImports($code) js {
-  const text = $code.text;
-  let result = "";
-  let inImport = false;
-  let braceCount = 0;
-  let i = 0;
+  // Simple regex that works in GritQL
+  const importPattern = /^[ \t]*import[ \t]+[^;]*;?[ \t]*$/gm;
   
-  while (i < text.length) {
-    // Check for import statement start
-    if (!inImport && text.substring(i).trim().startsWith("import ")) {
-      inImport = true;
-      
-      // Skip to the end of the current line or statement
-      while (i < text.length) {
-        // Track braces for multi-line imports
-        if (text[i] === '{') braceCount++;
-        if (text[i] === '}') braceCount--;
-        
-        // Move to next character
-        i++;
-        
-        // Check for end of import statement
-        if ((text[i-1] === ';' || text[i-1] === '\n') && braceCount === 0) {
-          // If we have a semicolon or newline (and no open braces), we might be at the end
-          // Look ahead to see if the next non-whitespace is not part of the import
-          let j = i;
-          while (j < text.length && /\s/.test(text[j])) j++;
-          
-          if (j >= text.length || !text.substring(j).trim().startsWith("from ")) {
-            inImport = false;
-            break;
-          }
-        }
-      }
-    } else if (!inImport) {
-      // Not in an import statement, add to result
-      result += text[i];
-      i++;
-    } else {
-      // Still in import statement, skip
-      i++;
-    }
-  }
-  
-  return result;
+  // Replace all import statements with empty strings
+  return $code.text.replace(importPattern, '');
 }
 
 file($body) where {
@@ -179,7 +140,8 @@ import {
 export class MyService extends Effect.Service<MyService>()("MyService", {
   effect: Effect.gen(function* () {
     return {
-      hello: () => "world"
+      hello: () => "world",
+      import: () => "just testing that the word import is okay here."
     } as const;
   })
 }) {}
@@ -203,7 +165,8 @@ import { run, Authz } from "core/mod.js";
 export class MyService extends Effect.Service<MyService>()("MyService", {
   effect: Effect.gen(function* () {
     return {
-      hello: () => "world"
+      hello: () => "world",
+      import: () => "just testing that the word import is okay here."
     } as const;
   })
 }) {}
