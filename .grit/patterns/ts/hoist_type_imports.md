@@ -96,11 +96,15 @@ file($body) where {
 
 ## Transformations
 
+Converts ...
+
 ```ts
 import { type Foo, Bar, type Zoo } from "pkg-a";
 import { type X } from "pkg-b";
 import { A } from "pkg-c";
 ```
+
+... to ...
 
 ```ts
 import type { Foo, Zoo } from "pkg-a";
