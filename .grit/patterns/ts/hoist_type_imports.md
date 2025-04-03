@@ -5,17 +5,6 @@ tags: [typescript, ts]
 
 Makes sure to hoist type imports to the top of the file.
 
-## Usage
-
-Add this to your `.grit/grit.yaml`:
-
-```yaml
-version: 0.0.1
-patterns:
-  - name: github.com/akoenig/grit#hoist_type_imports
-    level: info
-```
-
 ```grit
 engine marzano(0.1)
 language js
