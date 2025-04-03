@@ -5,6 +5,8 @@ tags: [typescript, ts]
 
 Makes sure to hoist type imports to the top of the file.
 
+## Pattern Definition
+
 ```grit
 engine marzano(0.1)
 language js
