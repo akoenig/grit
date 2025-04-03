@@ -53,12 +53,14 @@ file($body) where {
 				$regular_imports += `import { $regular_names } from $source;`
 			}
 		},
-		// Case 3: Side effect import
-		`import $source` as $import where { $regular_imports += `import $source;` },
-		// Case 4: regular imports
+		// Case 3: regular imports with 'from'
 		`import $clause from $source` as $import where {
 			if ($clause <: not contains "type") {
-				$regular_imports += `import $clause from $source;`
+        if ($import <: not contains "from") {
+				  $regular_imports += `import $source;`
+        } else {
+				  $regular_imports += `import $clause from $source;`
+        }
 			}
 		}
 	},
@@ -135,6 +137,7 @@ import {
   type User, 
   Authz
 } from "core/mod.js";
+import fs from "node:fs";
 import "@total-typescript/ts-reset";
 
 export class MyService extends Effect.Service<MyService>()("MyService", {
@@ -161,6 +164,7 @@ import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { Sidebar } from "~/components/sidebar/mod.jsx";
 import { SupporterId } from "~/domain/supporter.js";
 import { run, Authz } from "core/mod.js";
+import fs from "node:fs";
 import "@total-typescript/ts-reset";
 
 export class MyService extends Effect.Service<MyService>()("MyService", {
