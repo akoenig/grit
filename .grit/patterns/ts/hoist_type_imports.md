@@ -87,9 +87,11 @@ file($body) where {
 			$final_content += $import
 		}
 	},
-	// Append the rest of the file content
+	$final_content += "
 
+",
 	$final_content += extractBodyWithoutImports($body),
+
 	$body => $final_content
 }
 ```
@@ -117,23 +119,41 @@ import { A } from "pkg-c";
 ## Test
 
 ```typescript
-import { type FSWatcher, readFile } from "node:fs";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { Effect } from "effect";
+import { creatorId } from "~/middlewares/creator-id.js";
+import { tenant } from "~/middlewares/tenant.js";
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { Sidebar } from "~/components/sidebar/mod.jsx";
+import { run, type User, Authz } from "core/mod.js";
 
-import fs from "node:fs/promises";
-
-async function main() {
-  await fs.readFile("foo.txt");
-}
+export class MyService extends Effect.Service<MyService>()("MyService", {
+  effect: Effect.gen(function* () {
+    return {
+      hello: () => "world"
+    } as const;
+  })
+}) {}
 ```
 
 ```typescript
+import type { User } from "core/mod.js";
 
-import type { FSWatcher } from "node:fs";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { Effect } from "effect";
+import { creatorId } from "~/middlewares/creator-id.js";
+import { tenant } from "~/middlewares/tenant.js";
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { Sidebar } from "~/components/sidebar/mod.jsx";
+import { run, Authz } from "core/mod.js";
 
-import { readFile } from "node:fs";
-import fs from "node:fs/promises";
-
-async function main() {
-  await fs.readFile("foo.txt");
-}
+export class MyService extends Effect.Service<MyService>()("MyService", {
+  effect: Effect.gen(function* () {
+    return {
+      hello: () => "world"
+    } as const;
+  })
+}) {}
 ```
