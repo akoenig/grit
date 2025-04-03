@@ -18,10 +18,50 @@ function extractTypeName($import) js {
 }
 
 function extractBodyWithoutImports($code) js {
-    const lines = $code.text.split("\n");
-    const filteredLines = lines.filter(line => !line.trim().startsWith("import "));
-
-    return filteredLines.join("\n");
+  const text = $code.text;
+  let result = "";
+  let inImport = false;
+  let braceCount = 0;
+  let i = 0;
+  
+  while (i < text.length) {
+    // Check for import statement start
+    if (!inImport && text.substring(i).trim().startsWith("import ")) {
+      inImport = true;
+      
+      // Skip to the end of the current line or statement
+      while (i < text.length) {
+        // Track braces for multi-line imports
+        if (text[i] === '{') braceCount++;
+        if (text[i] === '}') braceCount--;
+        
+        // Move to next character
+        i++;
+        
+        // Check for end of import statement
+        if ((text[i-1] === ';' || text[i-1] === '\n') && braceCount === 0) {
+          // If we have a semicolon or newline (and no open braces), we might be at the end
+          // Look ahead to see if the next non-whitespace is not part of the import
+          let j = i;
+          while (j < text.length && /\s/.test(text[j])) j++;
+          
+          if (j >= text.length || !text.substring(j).trim().startsWith("from ")) {
+            inImport = false;
+            break;
+          }
+        }
+      }
+    } else if (!inImport) {
+      // Not in an import statement, add to result
+      result += text[i];
+      i++;
+    } else {
+      // Still in import statement, skip
+      i++;
+    }
+  }
+  
+  return result;
 }
 
 file($body) where {
@@ -122,11 +162,19 @@ import { A } from "pkg-c";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Effect } from "effect";
+import type {
+  Test
+} from "test";
 import { creatorId } from "~/middlewares/creator-id.js";
 import { tenant } from "~/middlewares/tenant.js";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { Sidebar } from "~/components/sidebar/mod.jsx";
-import { run, type User, Authz } from "core/mod.js";
+import { type Supporter, SupporterId } from "~/domain/supporter.js";
+import {
+  run,
+  type User, 
+  Authz
+} from "core/mod.js";
 
 export class MyService extends Effect.Service<MyService>()("MyService", {
   effect: Effect.gen(function* () {
@@ -138,6 +186,8 @@ export class MyService extends Effect.Service<MyService>()("MyService", {
 ```
 
 ```typescript
+import type { Test } from "test";
+import type { Supporter } from "~/domain/supporter.js";
 import type { User } from "core/mod.js";
 
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
@@ -147,6 +197,7 @@ import { creatorId } from "~/middlewares/creator-id.js";
 import { tenant } from "~/middlewares/tenant.js";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { Sidebar } from "~/components/sidebar/mod.jsx";
+import { SupporterId } from "~/domain/supporter.js";
 import { run, Authz } from "core/mod.js";
 
 export class MyService extends Effect.Service<MyService>()("MyService", {
