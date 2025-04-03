@@ -13,16 +13,12 @@ language js
 
 function extractTypeName($import) js {
     const [, name] = $import.text.split(" ");
-
     return name;
 }
 
 function extractBodyWithoutImports($code) js {
-  // Simple regex that works in GritQL
   const importPattern = /^[ \t]*import[ \t]+[^;]*;?[ \t]*$/gm;
-  
-  // Replace all import statements with empty strings
-  return $code.text.replace(importPattern, '');
+  return $code.text.replace(importPattern, '').trim();
 }
 
 file($body) where {
@@ -57,7 +53,9 @@ file($body) where {
 				$regular_imports += `import { $regular_names } from $source;`
 			}
 		},
-		// Case 3: regular imports
+		// Case 3: Side effect import
+		`import $source` as $import where { $regular_imports += `import $source;` },
+		// Case 4: regular imports
 		`import $clause from $source` as $import where {
 			if ($clause <: not contains "type") {
 				$regular_imports += `import $clause from $source;`
@@ -69,30 +67,31 @@ file($body) where {
 	if ($type_imports <: not []) {
 		$type_imports <: some bubble($final_content) $import where {
 			if ($final_content <: not "") {
-				$final_content += "
-"
+				$final_content += `
+`
 			},
 			$final_content += $import
 		}
 	},
 	if ($regular_imports <: not []) {
 		if ($final_content <: not "") {
-			$final_content += "
-"
+			$final_content += `
+
+`
 		},
 		$regular_imports <: some bubble($final_content) $import where {
 			if ($final_content <: not "") {
-				$final_content += "
-"
+				$final_content += `
+`
 			},
 			$final_content += $import
 		}
 	},
-	$final_content += "
+	$body_content = extractBodyWithoutImports($body),
+	$final_content += `
 
-",
-	$final_content += extractBodyWithoutImports($body),
-
+`,
+	$final_content += $body_content,
 	$body => $final_content
 }
 ```
@@ -117,7 +116,7 @@ import { Bar } from "pkg-a";
 import { A } from "pkg-c";
 ```
 
-## Test
+## Test with all possible scenarios
 
 ```typescript
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
@@ -136,6 +135,7 @@ import {
   type User, 
   Authz
 } from "core/mod.js";
+import "@total-typescript/ts-reset";
 
 export class MyService extends Effect.Service<MyService>()("MyService", {
   effect: Effect.gen(function* () {
@@ -161,6 +161,7 @@ import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { Sidebar } from "~/components/sidebar/mod.jsx";
 import { SupporterId } from "~/domain/supporter.js";
 import { run, Authz } from "core/mod.js";
+import "@total-typescript/ts-reset";
 
 export class MyService extends Effect.Service<MyService>()("MyService", {
   effect: Effect.gen(function* () {
