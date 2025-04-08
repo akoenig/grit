@@ -28,7 +28,7 @@ file($body) where {
 	$body <: contains bubble($type_imports, $regular_imports) or {
 		// Case 1: import type { ... }
 		`import type $type_clause from $source` as $import where {
-			$type_imports += `import type $type_clause from $source;`
+			$type_imports += `import type $type_clause from $source`
 		},
 		// Case 2: import { type ... }
 		`import { $imports } from $source` as $import where {
@@ -46,19 +46,19 @@ file($body) where {
 				}
 			},
 			if ($type_names <: not []) {
-				$type_imports += `import type { $type_names } from $source;`
+				$type_imports += `import type { $type_names } from $source`
 			},
 			if ($regular_names <: not []) {
-				$regular_imports += `import { $regular_names } from $source;`
+				$regular_imports += `import { $regular_names } from $source`
 			}
 		},
 		// Case 3: regular imports with 'from'
 		`import $clause from $source` as $import where {
 			if ($clause <: not contains "type") {
         if ($import <: not contains "from") {
-				  $regular_imports += `import $source;`
+				  $regular_imports += `import $source`
         } else {
-				  $regular_imports += `import $clause from $source;`
+				  $regular_imports += `import $clause from $source`
         }
 			}
 		}
