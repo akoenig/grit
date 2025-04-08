@@ -17,8 +17,9 @@ function extractTypeName($import) js {
 }
 
 function extractBodyWithoutImports($code) js {
-  const importPattern = /^[ \t]*import[ \t]+[^;]*;?[ \t]*$/gm;
-  return $code.text.replace(importPattern, '').trim();
+  const importRegex = /import\s+(?:["'][^"']+["']|[\s\S]+?\bfrom\s+["'][^"']+["'])(?:;|$)/gs;
+
+  return $code.text.replace(importRegex, '').trim();
 }
 
 file($body) where {
