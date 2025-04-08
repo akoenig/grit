@@ -17,20 +17,18 @@ function extractTypeName($import) js {
     return name;
 }
 
+function stripEmptyLines($code) js {
+    return $code.text.trim();
+}
+
 function extractBodyWithoutImports($code) js {
     const importPattern = /import\s+(?:["'][^"']+["']|[\s\S]+?\bfrom\s+["'][^"']+["'])\s*;?/gs;
 
-    return $code.text.replace(importPattern, '').trim();
+    return $code.text.replace(importPattern, '');
 }
 
 function prepareBody($imports, $body) js {
-  const endsWithEmptyLine = /\r?\n\s*$/.test($imports.text);
-
-  const startsWithEmptyLine = /^\s*\r?\n/.test($body.text);
-
-  const shouldAddEmptyLine = !endsWithEmptyLine || !startsWithEmptyLine;
-
-  return shouldAddEmptyLine ? $imports.text + "\n\n" + $body.text : $imports.text + $body.text;
+  return `${$imports.text}\n\n${$body.text}`;
 }
 
 file($body) where {
@@ -89,7 +87,6 @@ file($body) where {
 	if ($regular_imports <: not []) {
 		if ($final_content <: not "") {
 			$final_content += `
-
 `
 		},
 		$regular_imports <: some bubble($final_content) $import where {
@@ -101,9 +98,9 @@ file($body) where {
 		}
 	},
 	$body_content = extractBodyWithoutImports($body),
-	$final_content += `
-`,
-	$body => prepareBody($final_content, $body_content)
+  $final_imports = stripEmptyLines($final_content),
+  $final_contents = stripEmptyLines($body_content),
+  $body => prepareBody($final_imports, $final_contents)
 }
 ```
 
