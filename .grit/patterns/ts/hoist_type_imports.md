@@ -17,13 +17,11 @@ function extractTypeName($import) js {
 }
 
 function extractBodyWithoutImports($code) js {
-  const importRegex = /import\s+(?:["'][^"']+["']|[\s\S]+?\bfrom\s+["'][^"']+["'])(?:;|$)/gs;
-
-  return $code.text.replace(importRegex, '').trim();
+    const importPattern = /import\s+(?:["'][^"']+["']|[\s\S]+?\bfrom\s+["'][^"']+["'])\s*;?/gs;
+  return $code.text.replace(importPattern, '').trim();
 }
 
 file($body) where {
-	$body_without_body = "",
 	$type_imports = [],
 	$regular_imports = [],
 	// First pass: collect and normalize all imports
